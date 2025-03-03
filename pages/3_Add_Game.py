@@ -2,6 +2,9 @@ import streamlit as st
 from datetime import datetime
 import pandas as pd
 import matplotlib.pyplot as plt
+import psycopg2
+
+
 
 # This represents the intial state of the game table
 game_cols =  {

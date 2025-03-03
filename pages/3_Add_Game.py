@@ -156,20 +156,3 @@ if st.button("Add Game", type="primary"):
         if key.startswith("P"):
             del st.session_state[key]
 
-
-# NOTES
-
-# Make final table outcome
-    # Make each stat number a text button that displays the piechart
-    
-    # make combined columns clickable, use individual components of combined columns to display pir chart
-
-### OR
-
-#   keep game table with game stats
-    # make the player stats page where you can see the aggregated all time stats with combined columns and pie charts of distributions
-
-
-
-# Key Error ""
-# whenever i spam on stat button too quickly

@@ -1,4 +1,4 @@
-# 🎈 Spikeball Stat Tracker
+# 🤾 Spikeball Stat Tracker
 
 This app is made to track Spikeball matches and individual player stats!
 

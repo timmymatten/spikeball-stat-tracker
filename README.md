@@ -2,6 +2,7 @@
 
 This app is made to track Spikeball matches and individual player stats!
 
+The app has not yet been deployed so the following link will work soon!
 [![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://spikeball-stat-tracker.streamlit.app/)
 
 ### How to run it on your own machine

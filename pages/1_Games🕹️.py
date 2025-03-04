@@ -14,7 +14,13 @@ st.write(
 
 if "all_games" in st.session_state and len(st.session_state["all_games"]) > 0:
     for i, game in enumerate(st.session_state["all_games"]):
-        st.subheader(f"Game {i + 1}")
+        if st.session_state['Team 1_score'] > st.session_state['Team 2_score']:
+            st.subheader(f"Game {i + 1}: T1 {st.session_state['Team 1_score']} - {st.session_state['Team 2_score']}")
+        else:
+            st.subheader(f"Game {i + 1}: T2 {st.session_state['Team 2_score']} - {st.session_state['Team 1_score']}")
+        st.session_state['Team 1_score'] = 0
+        st.session_state['Team 2_score'] = 0
+
         game =  game.applymap(lambda x: round(x) if isinstance(x, (int, float)) else x)
         st.dataframe(game)
 else:

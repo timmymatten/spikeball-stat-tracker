@@ -54,12 +54,14 @@ def execute_query(query, params=None, fetch=False):
 def fetch_games():
     """Fetch all games from the database."""
     query = "SELECT * FROM games;"
-    return execute_query(query, fetch=True)
+    result = execute_query(query, fetch=True)
+    return result if result else []  # Return an empty list if result is None
 
 def fetch_player_stats():
     """Fetch all player stats from the database."""
     query = "SELECT * FROM player_stats;"
-    return execute_query(query, fetch=True)
+    result = execute_query(query, fetch=True)
+    return result if result else [] # Return an empty list if result is None
 
 def save_game(game_date, team1_score, team2_score, game_data):
     """Save a game to the database."""

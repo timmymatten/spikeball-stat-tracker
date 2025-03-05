@@ -44,6 +44,21 @@ def set_game_table_name(df, name):
         df = pd.concat([df, new_row])
     return df
 
+def scorebug(team_name):
+    score_key = f"{team_name}_score"
+    cols = st.columns(3)
+
+    if score_key not in st.session_state:
+        st.session_state[score_key] = 0
+    
+    cols[0].header(team_name)
+    
+    with cols[1]:
+        if st.button("SCORE", type="primary", key=f"{team_name}_score_button"):
+            st.session_state[score_key] += 1
+    
+    cols[2].write(st.session_state[score_key])
+
 # sets the element in the given row and column to x in the given table
 @st.cache_data
 def set_element_df(df, column, row, x):
@@ -126,7 +141,9 @@ def player_stats(player_name, player_prefix):
 
 # Team Layout Function
 def team_layout(team_name, player1_label, player2_label, player1_prefix, player2_prefix):
-    st.header(team_name)
+    
+    scorebug(team_name)
+
     cols = st.columns(2)
     player1_name = cols[0].text_input(player1_label)
     player2_name = cols[1].text_input(player2_label)
@@ -156,4 +173,6 @@ if st.button("Add Game", type="primary"):
     for key in list(st.session_state.keys()):
         if key.startswith("P"):
             del st.session_state[key]
+
+   
 

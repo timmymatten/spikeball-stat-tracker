@@ -2,11 +2,6 @@ import streamlit as st
 from datetime import datetime
 import pandas as pd
 import matplotlib.pyplot as plt
-import psycopg2
-
-conn = psycopg2.connect(host = "localhost", dbname = "postgres", user = "postgres")
-cur = conn.cursor()
-
 
 # This represents the intial state of the game table
 game_cols =  {
@@ -161,8 +156,4 @@ if st.button("Add Game", type="primary"):
     for key in list(st.session_state.keys()):
         if key.startswith("P"):
             del st.session_state[key]
-
-conn.commit()
-cur.close()
-conn.close()
 

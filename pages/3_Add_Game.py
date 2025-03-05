@@ -4,6 +4,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import psycopg2
 
+conn = psycopg2.connect(host = "localhost", dbname = "postgres", user = "postgres")
+cur = conn.cursor()
 
 
 # This represents the intial state of the game table
@@ -22,7 +24,8 @@ game_cols =  {
 
 # initiate the game table in session state
 if "game_df" not in st.session_state:
-        st.session_state["game_df"] = pd.DataFrame(game_cols)   
+        st.session_state["game_df"] = pd.DataFrame(game_cols) 
+  
 
 if "player_table" not in st.session_state:
         st.session_state["player_table"] = pd.DataFrame(game_cols)
@@ -158,4 +161,8 @@ if st.button("Add Game", type="primary"):
     for key in list(st.session_state.keys()):
         if key.startswith("P"):
             del st.session_state[key]
+
+conn.commit()
+cur.close()
+conn.close()
 

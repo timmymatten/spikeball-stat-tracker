@@ -2,6 +2,8 @@ import streamlit as st
 from datetime import datetime
 import pandas as pd
 import matplotlib.pyplot as plt
+import json
+from db import save_game, save_player_stats, update_player_stats, fetch_player_stats
 
 # This represents the intial state of the game table
 game_cols =  {
@@ -24,6 +26,45 @@ if "game_df" not in st.session_state:
 
 if "player_table" not in st.session_state:
         st.session_state["player_table"] = pd.DataFrame(game_cols)
+        
+# Load player stats from database on startup
+if "db_loaded" not in st.session_state:
+    st.session_state["db_loaded"] = True
+    db_player_stats = fetch_player_stats()
+    
+    if db_player_stats:
+        for player in db_player_stats:
+            player_name = player[1]  # player_name is at index 1
+            if player_name not in st.session_state["player_table"].index:
+                new_row = pd.DataFrame({
+                    "Cut": [0],
+                    "Drop": [0],
+                    "Rev": [0],
+                    "High": [0],
+                    "Side": [0],
+                    "Rim": [0],
+                    '✅ set': [0], 
+                    '❌ set': [0], 
+                    '✅ hit': [0], 
+                    '❌ hit': [0]}, 
+                    index=[player_name])
+                st.session_state["player_table"] = pd.concat([st.session_state["player_table"], new_row])
+            
+            # Update player stats from database
+            st.session_state["player_table"].at[player_name, "Cut"] = player[2]  # good_serves
+            st.session_state["player_table"].at[player_name, "Drop"] = player[2]  # good_serves
+            st.session_state["player_table"].at[player_name, "Rev"] = player[2]  # good_serves
+            st.session_state["player_table"].at[player_name, "High"] = player[3]  # bad_serves
+            st.session_state["player_table"].at[player_name, "Side"] = player[3]  # bad_serves
+            st.session_state["player_table"].at[player_name, "Rim"] = player[3]  # bad_serves
+            st.session_state["player_table"].at[player_name, "✅ set"] = player[4]  # successful_sets
+            st.session_state["player_table"].at[player_name, "❌ set"] = player[5]  # failed_sets
+            st.session_state["player_table"].at[player_name, "✅ hit"] = player[6]  # successful_hits
+            st.session_state["player_table"].at[player_name, "❌ hit"] = player[7]  # failed_hits
+            
+            # Calculate Good Serves and Bad Serves
+            st.session_state["player_table"]["Good Serves"] = st.session_state["player_table"][["Cut", "Drop", "Rev"]].sum(axis=1)
+            st.session_state["player_table"]["Bad Serves"] = st.session_state["player_table"][["High", "Side", "Rim"]].sum(axis=1)
 
 # adds the player row with the given name to the given game table
 @st.cache_data
@@ -74,7 +115,7 @@ st.set_page_config(page_title="Add Game", page_icon="➕")
 cols = st.columns(4)
 
 # Date
-cols[0].date_input("Game Date", format="MM/DD/YYYY")
+game_date = cols[0].date_input("Game Date", format="MM/DD/YYYY")
 
 # Function to handle player stats 
 def player_stats(player_name, player_prefix):
@@ -164,6 +205,54 @@ if st.button("Add Game", type="primary"):
     st.write("### Final Stats for this Game")
 
     st.dataframe(st.session_state["game_df"])
+    
+    # Save game to database
+    game_data = st.session_state["game_df"].to_dict(orient='index')
+    save_game(
+        game_date=game_date,
+        team1_score=st.session_state["Team 1_score"],
+        team2_score=st.session_state["Team 2_score"],
+        game_data=json.dumps(game_data)
+    )
+    
+    # Save player stats to database
+    for player_name in st.session_state["player_table"].index:
+        if player_name.strip() != "":
+            good_serves = st.session_state["player_table"].loc[player_name, "Good Serves"]
+            bad_serves = st.session_state["player_table"].loc[player_name, "Bad Serves"]
+            successful_sets = st.session_state["player_table"].loc[player_name, "✅ set"]
+            failed_sets = st.session_state["player_table"].loc[player_name, "❌ set"]
+            successful_hits = st.session_state["player_table"].loc[player_name, "✅ hit"]
+            failed_hits = st.session_state["player_table"].loc[player_name, "❌ hit"]
+            
+            # Check if player exists in database
+            db_player_stats = fetch_player_stats()
+            player_exists = False
+            for player in db_player_stats:
+                if player[1] == player_name:
+                    player_exists = True
+                    break
+            
+            if player_exists:
+                update_player_stats(
+                    player_name=player_name,
+                    good_serves=good_serves,
+                    bad_serves=bad_serves,
+                    successful_sets=successful_sets,
+                    failed_sets=failed_sets,
+                    successful_hits=successful_hits,
+                    failed_hits=failed_hits
+                )
+            else:
+                save_player_stats(
+                    player_name=player_name,
+                    good_serves=good_serves,
+                    bad_serves=bad_serves,
+                    successful_sets=successful_sets,
+                    failed_sets=failed_sets,
+                    successful_hits=successful_hits,
+                    failed_hits=failed_hits
+                )
 
     st.session_state["all_games"].append(st.session_state["game_df"].copy())
     st.success(f"Game {len(st.session_state['all_games'])} Added!")
